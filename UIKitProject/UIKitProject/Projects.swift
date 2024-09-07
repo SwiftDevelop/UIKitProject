@@ -9,7 +9,7 @@ import UIKit
 
 struct ProjectInfo {
     let name: String
-    let madeBy: String
+    let base: String
     let status: ProjectStatus
     let viewController: UIViewController
 }
@@ -21,5 +21,5 @@ enum ProjectStatus: String {
 }
 
 let projects: [ProjectInfo] = [
-    ProjectInfo(name: "Calculator", madeBy: "Apple", status: .notStarted, viewController: CalculatorViewController())
+    ProjectInfo(name: "Calculator", base: "Apple", status: .completed, viewController: CalculatorViewController())
 ]

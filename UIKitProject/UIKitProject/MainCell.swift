@@ -19,7 +19,7 @@ final class MainCell: UITableViewCell {
         return label
     }()
     
-    private let madeByLabel: UILabel = {
+    private let baseLabel: UILabel = {
         let label = UILabel()
         label.textColor = .gray
         label.font = .systemFont(ofSize: 13)
@@ -59,7 +59,7 @@ private extension MainCell {
     
     func setupUI() {
         addSubview(nameLabel)
-        addSubview(madeByLabel)
+        addSubview(baseLabel)
         addSubview(statusLabel)
     }
     
@@ -70,9 +70,9 @@ private extension MainCell {
         ])
         
         NSLayoutConstraint.activate([
-            madeByLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
-            madeByLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            madeByLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
+            baseLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            baseLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            baseLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
         ])
         
         NSLayoutConstraint.activate([
@@ -88,7 +88,7 @@ extension MainCell {
     
     func configure(info: ProjectInfo) {
         nameLabel.text = info.name
-        madeByLabel.text = "by \(info.madeBy)"
+        baseLabel.text = "based on \(info.base)"
         statusLabel.text = info.status.rawValue
     }
 }

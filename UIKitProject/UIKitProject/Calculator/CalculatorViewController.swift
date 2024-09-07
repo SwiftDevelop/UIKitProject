@@ -33,6 +33,7 @@ final class CalculatorViewController: UIViewController {
     
     // MARK: Properties
     
+    private var selectedKeypad: String?
     private var currentOperation: String?
     private var firstNumber: Double?
     private var secondNumber: Double?
@@ -123,21 +124,19 @@ private extension CalculatorViewController {
             switch title {
             case "AC":
                 resetCalculator()
-            case "\u{00F7}", "\u{00D7}", "\u{2212}", "\u{FF0B}":
-                currentOperation = title
-                firstNumber = Double(displayLabel.text!)
-                displayLabel.text = "0"
+            case plusUnicode, minusUnicode, multiplyUnicode, divideUnicode, plusMinusUnicode:
+                handleOperation(title)
             case "=":
-                guard let operation = currentOperation, let first = firstNumber else { return }
-                secondNumber = Double(displayLabel.text!)
-                performOperation(operation, first, secondNumber!)
-            case "\u{00B1}":
+                handleEquals()
+            case plusMinusUnicode:
                 toggleSign()
             case "%":
                 applyPercentage()
             default:
                 appendNumber(title)
             }
+            
+            selectedKeypad = title
         }
     }
 }
@@ -153,47 +152,76 @@ private extension CalculatorViewController {
         secondNumber = nil
     }
     
-    private func performOperation(_ operation: String, _ first: Double, _ second: Double) {
+    func performOperation(_ operation: String, _ first: Double, _ second: Double) -> Double {
         var result: Double = 0
         
         switch operation {
-        case "\u{FF0B}":
+        case plusUnicode:
             result = first + second
-        case "\u{2212}":
+        case minusUnicode:
             result = first - second
-        case "\u{00D7}":
+        case multiplyUnicode:
             result = first * second
-        case "\u{00F7}":
+        case divideUnicode:
             result = first / second
         default:
             break
         }
         
-        displayLabel.text = formatNumber(result)
-        currentOperation = nil
-        firstNumber = result
-        secondNumber = nil
+        return result
     }
     
-    private func toggleSign() {
+    func handleOperation(_ operation: String) {
+        currentOperation = operation
+        
+        let currentNumber = Double(displayLabel.text!)
+        
+        if firstNumber == nil {
+            firstNumber = currentNumber
+        } else {
+            let result = performOperation(currentOperation!, firstNumber!, currentNumber!)
+            displayLabel.text = formatNumber(result)
+            firstNumber = result
+        }
+    }
+    
+    func handleEquals() {
+        guard let currentOperation, let firstNumber else { return }
+        let currentNumber = Double(displayLabel.text!) ?? 0
+        let result = performOperation(currentOperation, currentNumber, firstNumber)
+        displayLabel.text = formatNumber(result)
+    }
+    
+    func toggleSign() {
         guard let text = displayLabel.text, let value = Double(text) else { return }
         displayLabel.text = formatNumber(value * -1)
     }
     
-    private func applyPercentage() {
+    func applyPercentage() {
         guard let text = displayLabel.text, let value = Double(text) else { return }
         displayLabel.text = formatNumber(value / 100)
     }
     
-    private func appendNumber(_ number: String) {
-        if displayLabel.text == "0" {
+    func appendNumber(_ number: String) {
+        if displayLabel.text == "0" || selectedKeypad == currentOperation {
             displayLabel.text = number
         } else {
-            displayLabel.text?.append(number)
+            let currentText = (displayLabel.text ?? "") + number
+            let currentNumber = Double(currentText.replacingOccurrences(of: ",", with: "")) ?? 0
+            displayLabel.text = formatNumber(currentNumber)
         }
     }
     
-    private func formatNumber(_ value: Double) -> String {
-        return value == floor(value) ? String(format: "%.0f", value) : String(value)
+    func formatNumber(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        
+        if let formattedNumber = formatter.string(from: NSNumber(value: value)) {
+            return formattedNumber
+        } else {
+            return String(value)
+        }
     }
+
 }
